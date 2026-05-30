@@ -26,6 +26,8 @@ enum HelperError: LocalizedError {
   case remindersAccessDenied
   case missingURL
   case listUnavailable
+  case remUnavailable
+  case remFailed(String)
 
   var errorDescription: String? {
     switch self {
@@ -41,6 +43,13 @@ enum HelperError: LocalizedError {
       return "Missing URL"
     case .listUnavailable:
       return "无法创建或找到“\(listName)”提醒事项列表。"
+    case .remUnavailable:
+      return "找不到 Remlink 内置 rem。请重新构建并安装 /Applications/Remlink.app。"
+    case .remFailed(let detail):
+      if isRemindersAccessDenied(detail) {
+        return "rem 提醒事项访问被拒绝。请在 Remlink 中点击“授权提醒事项”，并在 macOS 弹窗中允许访问。"
+      }
+      return detail
     }
   }
 }
@@ -54,6 +63,7 @@ struct RemlinkHelper {
         guard try await requestRemindersAccess(store) else {
           throw HelperError.remindersAccessDenied
         }
+        _ = try runRem(arguments: ["lists", "--output", "json"])
         print("RemlinkHelper reminders access granted.")
         return
       }
@@ -100,17 +110,12 @@ private func writeMessage(_ response: NativeResponse) throws {
 }
 
 private func handle(_ request: NativeRequest) async throws -> NativeResponse {
-  let store = EKEventStore()
-  guard try await requestRemindersAccess(store) else {
-    throw HelperError.remindersAccessDenied
-  }
-
   switch request.action {
   case "list_tags":
-    let tags = try await listExistingTags(store: store, filter: request.filter ?? "链接")
+    let tags = try listExistingTags(filter: request.filter ?? "链接")
     return NativeResponse(ok: true, tags: tags, error: nil)
   case "save_link":
-    try saveLink(request, store: store)
+    try saveLink(request)
     return NativeResponse(ok: true, tags: nil, error: nil)
   default:
     throw HelperError.invalidRequest
@@ -133,54 +138,44 @@ private func requestRemindersAccess(_ store: EKEventStore) async throws -> Bool 
   }
 }
 
-private func remindersCalendar(store: EKEventStore) throws -> EKCalendar {
-  if let existing = store.calendars(for: .reminder).first(where: { $0.title == listName }) {
-    return existing
-  }
-
-  let calendar = EKCalendar(for: .reminder, eventStore: store)
-  calendar.title = listName
-  if let source = store.defaultCalendarForNewReminders()?.source ?? store.sources.first(where: { $0.sourceType == .calDAV }) ?? store.sources.first {
-    calendar.source = source
-  }
-  try store.saveCalendar(calendar, commit: true)
-  return calendar
-}
-
-private func saveLink(_ request: NativeRequest, store: EKEventStore) throws {
+private func saveLink(_ request: NativeRequest) throws {
   let urlString = (request.url ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
   guard !urlString.isEmpty else {
     throw HelperError.missingURL
   }
 
-  let reminder = EKReminder(eventStore: store)
-  reminder.calendar = try remindersCalendar(store: store)
-  reminder.title = normalized(request.title) ?? urlString
-  reminder.url = URL(string: urlString)
-
+  let title = normalized(request.title) ?? urlString
   let note = normalized(request.note)
   let tags = normalizeTags(request.tags)
-  reminder.notes = makeNotes(url: urlString, note: note, tags: tags)
 
-  try store.save(reminder, commit: true)
+  var arguments = [
+    "add",
+    title,
+    "--list",
+    listName,
+    "--url",
+    urlString,
+    "--output",
+    "json"
+  ]
+  if let note {
+    arguments += ["--notes", note]
+  }
+  if !tags.isEmpty {
+    arguments += ["--tags", tags.joined(separator: ",")]
+  }
+  _ = try runRem(arguments: arguments)
 }
 
-private func listExistingTags(store: EKEventStore, filter: String) async throws -> [String] {
-  let calendar = try remindersCalendar(store: store)
-  let predicate = store.predicateForReminders(in: [calendar])
-  let allTags = await withCheckedContinuation { continuation in
-    store.fetchReminders(matching: predicate) { reminders in
-      var tags = Set<String>()
-      for reminder in reminders ?? [] {
-        collectHashTags(from: reminder.title, into: &tags)
-        collectHashTags(from: reminder.notes, into: &tags)
-      }
-      continuation.resume(returning: tags)
-    }
-  }
+private func listExistingTags(filter: String) throws -> [String] {
+  let output = try runRem(arguments: ["list", "--list", listName, "--output", "json"])
+  let data = Data(output.utf8)
+  let object = (try? JSONSerialization.jsonObject(with: data)) ?? []
+  var tags = Set<String>()
+  collectTags(from: object, into: &tags)
 
   let trimmedFilter = filter.trimmingCharacters(in: .whitespacesAndNewlines)
-  let filtered = trimmedFilter.isEmpty ? allTags : allTags.filter { $0.contains(trimmedFilter) }
+  let filtered = trimmedFilter.isEmpty ? tags : tags.filter { $0.contains(trimmedFilter) }
   return filtered.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
 }
 
@@ -200,30 +195,73 @@ private func normalizeTags(_ values: [String]?) -> [String] {
   return result
 }
 
-private func makeNotes(url: String, note: String?, tags: [String]) -> String {
-  var parts = [url]
-  if let note {
-    parts.append(note)
+private func runRem(arguments: [String]) throws -> String {
+  let process = Process()
+  process.executableURL = try remURL()
+  process.arguments = arguments
+
+  let outputPipe = Pipe()
+  let errorPipe = Pipe()
+  process.standardOutput = outputPipe
+  process.standardError = errorPipe
+
+  try process.run()
+  process.waitUntilExit()
+
+  let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+  let error = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+
+  guard process.terminationStatus == 0 else {
+    throw HelperError.remFailed(error.isEmpty ? output : error)
   }
-  if !tags.isEmpty {
-    parts.append(tags.map { "#\($0)" }.joined(separator: " "))
-  }
-  return parts.joined(separator: "\n\n")
+  return output
 }
 
-private func collectHashTags(from text: String?, into tags: inout Set<String>) {
-  guard let text else {
-    return
+private func remURL() throws -> URL {
+  let helperBundle = Bundle.main.bundleURL
+  let appContents = helperBundle.deletingLastPathComponent().deletingLastPathComponent()
+  let candidates = [
+    appContents.appendingPathComponent("Resources/Remlink_Remlink.bundle/Resources/bin/rem"),
+    appContents.appendingPathComponent("Resources/bin/rem"),
+    URL(fileURLWithPath: "/Applications/Remlink.app/Contents/Resources/Remlink_Remlink.bundle/Resources/bin/rem")
+  ]
+
+  for candidate in candidates where FileManager.default.isExecutableFile(atPath: candidate.path) {
+    return candidate
   }
-  let pattern = #"(?<!\S)#([^\s#，,、]+)"#
-  guard let regex = try? NSRegularExpression(pattern: pattern) else {
-    return
-  }
-  let range = NSRange(text.startIndex..<text.endIndex, in: text)
-  for match in regex.matches(in: text, range: range) {
-    guard let tagRange = Range(match.range(at: 1), in: text) else {
-      continue
+  throw HelperError.remUnavailable
+}
+
+private func collectTags(from value: Any, into tags: inout Set<String>) {
+  if let dictionary = value as? [String: Any] {
+    for (key, child) in dictionary {
+      if key == "tags" || key == "hashtags" {
+        collectTags(from: child, into: &tags)
+      } else if child is [String: Any] || child is [Any] {
+        collectTags(from: child, into: &tags)
+      }
     }
-    tags.insert(String(text[tagRange]))
+    return
   }
+
+  if let array = value as? [Any] {
+    for item in array {
+      collectTags(from: item, into: &tags)
+    }
+    return
+  }
+
+  if let tag = value as? String {
+    let cleaned = tag.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "#"))
+    if !cleaned.isEmpty {
+      tags.insert(cleaned)
+    }
+  }
+}
+
+private func isRemindersAccessDenied(_ detail: String) -> Bool {
+  let lowercased = detail.lowercased()
+  return lowercased.contains("reminders access denied")
+    || lowercased.contains("failed to initialize reminders access")
+    || lowercased.contains("access denied")
 }
