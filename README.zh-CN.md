@@ -140,6 +140,13 @@ host 路径会指向签名后的 helper：
 系统设置 → 隐私与安全性 → 提醒事项
 ```
 
+## 第三方组件
+
+Remlink 内置了 `rem`，这是一个用于 macOS 提醒事项的开源 CLI，采用 MIT License。
+
+- 项目地址：https://github.com/BRO3886/rem
+- 第三方声明：[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+
 ## 发布
 
 GitHub Actions 会在推送 `v*` 标签时构建 App，并创建 GitHub Release。也可以在 GitHub Actions 页面手动运行 release workflow。

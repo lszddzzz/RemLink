@@ -140,6 +140,13 @@ If macOS does not show a prompt, check:
 系统设置 → 隐私与安全性 → 提醒事项
 ```
 
+## Third-party Components
+
+Remlink bundles `rem`, an open-source CLI for macOS Reminders licensed under the MIT License.
+
+- Project: https://github.com/BRO3886/rem
+- Notices: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+
 ## Release
 
 GitHub Actions builds the app and creates a GitHub Release when a `v*` tag is pushed. The release workflow can also be started manually from the GitHub Actions page.
