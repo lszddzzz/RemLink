@@ -430,39 +430,29 @@ struct ContentView: View {
     }
 
     let installURL = try requireInstallDirectory()
-    let exportScript = installURL.appendingPathComponent("scripts/export_links_yaml.py").path
-    let outputURL = installURL.appendingPathComponent("exports").path
-    return !arguments.contains(exportScript) || !arguments.contains(outputURL)
+    let helper = try helperHostURL().path
+    let outputFile = installURL.appendingPathComponent("exports/reminders-links.yaml").path
+    return !arguments.contains(helper) || !arguments.contains(outputFile)
   }
 
   private func writeDailyExportAgent() throws {
     let installURL = try requireInstallDirectory()
     try installPlugin()
 
-    let scriptsURL = installURL.appendingPathComponent("scripts", isDirectory: true)
-    let exportScript = scriptsURL.appendingPathComponent("export_links_yaml.py")
     let outputURL = installURL.appendingPathComponent("exports", isDirectory: true)
     let logsURL = installURL.appendingPathComponent("logs", isDirectory: true)
     try FileManager.default.createDirectory(at: outputURL, withIntermediateDirectories: true)
     try FileManager.default.createDirectory(at: logsURL, withIntermediateDirectories: true)
 
-    let homebrewRem = URL(fileURLWithPath: "/opt/homebrew/bin/rem")
-    let installedRem = installURL.appendingPathComponent("bin/rem")
+    let outputFile = outputURL.appendingPathComponent("reminders-links.yaml")
     let plistURL = dailyExportPlistURL()
 
     let plist: [String: Any] = [
       "Label": Constants.dailyExportAgentID,
       "ProgramArguments": [
-        "/usr/bin/python3",
-        exportScript.path,
-        "--list",
-        Constants.listName,
-        "--output-dir",
-        outputURL.path,
-        "--rem",
-        homebrewRem.path,
-        "--rem",
-        installedRem.path
+        try helperHostURL().path,
+        "--export-yaml",
+        outputFile.path
       ],
       "StartCalendarInterval": [
         "Hour": 11,

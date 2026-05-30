@@ -95,7 +95,7 @@ links:
 ~/Library/LaunchAgents/com.landlord.remlink.daily-export.plist
 ```
 
-It runs every day at 11:00 and overwrites:
+It runs `RemlinkHelper --export-yaml` every day at 11:00 and overwrites:
 
 ```text
 <your persistent folder>/exports/reminders-links.yaml

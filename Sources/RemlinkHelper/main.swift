@@ -68,6 +68,12 @@ struct RemlinkHelper {
         return
       }
 
+      if let exportPath = argumentValue(after: "--export-yaml") {
+        let count = try exportYAML(to: URL(fileURLWithPath: exportPath))
+        print("Exported \(count) links to \(exportPath)")
+        return
+      }
+
       guard let request = try readMessage() else {
         return
       }
@@ -179,6 +185,48 @@ private func listExistingTags(filter: String) throws -> [String] {
   return filtered.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
 }
 
+private func exportYAML(to outputURL: URL) throws -> Int {
+  let records = try exportedReminderRecords()
+  let links = records.compactMap { record -> LinkRecord? in
+    let url = firstString(record, keys: ["url", "URL", "link"])
+    guard !url.isEmpty else {
+      return nil
+    }
+    return LinkRecord(
+      title: firstString(record, keys: ["title", "name"]),
+      url: url,
+      tags: firstStringArray(record, keys: ["tags", "hashtags"]),
+      note: firstString(record, keys: ["notes", "body", "note"])
+    )
+  }
+
+  try FileManager.default.createDirectory(at: outputURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+  try makeYAML(links).write(to: outputURL, atomically: true, encoding: .utf8)
+  return links.count
+}
+
+private func exportedReminderRecords() throws -> [[String: Any]] {
+  let tempURL = FileManager.default.temporaryDirectory
+    .appendingPathComponent("remlink-helper-export-\(UUID().uuidString).json")
+  defer {
+    try? FileManager.default.removeItem(at: tempURL)
+  }
+
+  _ = try runRem(arguments: [
+    "export",
+    "--list",
+    listName,
+    "--format",
+    "json",
+    "--output-file",
+    tempURL.path
+  ])
+
+  let data = try Data(contentsOf: tempURL)
+  let object = try JSONSerialization.jsonObject(with: data)
+  return extractReminderRecords(from: object)
+}
+
 private func normalized(_ value: String?) -> String? {
   let trimmed = (value ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
   return trimmed.isEmpty ? nil : trimmed
@@ -264,4 +312,92 @@ private func isRemindersAccessDenied(_ detail: String) -> Bool {
   return lowercased.contains("reminders access denied")
     || lowercased.contains("failed to initialize reminders access")
     || lowercased.contains("access denied")
+}
+
+private struct LinkRecord {
+  var title: String
+  var url: String
+  var tags: [String]
+  var note: String
+}
+
+private func argumentValue(after option: String) -> String? {
+  guard let index = CommandLine.arguments.firstIndex(of: option) else {
+    return nil
+  }
+  let valueIndex = CommandLine.arguments.index(after: index)
+  guard valueIndex < CommandLine.arguments.endIndex else {
+    return nil
+  }
+  return CommandLine.arguments[valueIndex]
+}
+
+private func extractReminderRecords(from object: Any) -> [[String: Any]] {
+  if let array = object as? [[String: Any]] {
+    return array
+  }
+  if let dictionary = object as? [String: Any] {
+    for key in ["reminders", "items", "data"] {
+      if let records = dictionary[key] {
+        let extracted = extractReminderRecords(from: records)
+        if !extracted.isEmpty {
+          return extracted
+        }
+      }
+    }
+  }
+  return []
+}
+
+private func firstString(_ dictionary: [String: Any], keys: [String]) -> String {
+  for key in keys {
+    if let value = dictionary[key] as? String {
+      return value
+    }
+    if let value = dictionary[key] {
+      return String(describing: value)
+    }
+  }
+  return ""
+}
+
+private func firstStringArray(_ dictionary: [String: Any], keys: [String]) -> [String] {
+  for key in keys {
+    if let values = dictionary[key] as? [String] {
+      return values.filter { !$0.isEmpty }
+    }
+    if let values = dictionary[key] as? [Any] {
+      return values.map { String(describing: $0) }.filter { !$0.isEmpty }
+    }
+  }
+  return []
+}
+
+private func makeYAML(_ links: [LinkRecord]) -> String {
+  var lines = ["links:"]
+  for link in links {
+    lines.append("  - title: \(yamlQuoted(link.title))")
+    lines.append("    url: \(yamlQuoted(link.url))")
+    lines.append("    tags:")
+    if link.tags.isEmpty {
+      lines.append("      []")
+    } else {
+      for tag in link.tags {
+        lines.append("      - \(yamlQuoted(tag))")
+      }
+    }
+    if link.note.isEmpty {
+      lines.append("    note: \"\"")
+    } else {
+      lines.append("    note: |-")
+      for line in link.note.split(separator: "\n", omittingEmptySubsequences: false) {
+        lines.append("      \(line)")
+      }
+    }
+  }
+  return lines.joined(separator: "\n") + "\n"
+}
+
+private func yamlQuoted(_ value: String) -> String {
+  "\"\(value.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\""))\""
 }

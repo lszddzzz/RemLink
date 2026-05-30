@@ -95,7 +95,7 @@ links:
 ~/Library/LaunchAgents/com.landlord.remlink.daily-export.plist
 ```
 
-它每天 11:00 运行，并覆盖更新：
+它每天 11:00 运行 `RemlinkHelper --export-yaml`，并覆盖更新：
 
 ```text
 <你的持久化文件夹>/exports/reminders-links.yaml
