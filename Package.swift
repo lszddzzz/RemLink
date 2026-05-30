@@ -7,7 +7,8 @@ let package = Package(
     .macOS(.v13)
   ],
   products: [
-    .executable(name: "Remlink", targets: ["Remlink"])
+    .executable(name: "Remlink", targets: ["Remlink"]),
+    .executable(name: "RemlinkHelper", targets: ["RemlinkHelper"])
   ],
   targets: [
     .executableTarget(
@@ -15,6 +16,9 @@ let package = Package(
       resources: [
         .copy("Resources")
       ]
+    ),
+    .executableTarget(
+      name: "RemlinkHelper"
     )
   ]
 )

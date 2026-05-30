@@ -2,15 +2,16 @@
 
 [中文说明](README.zh-CN.md)
 
-Remlink is a macOS utility and Chromium extension for saving web links into Apple Reminders.
+Remlink is a macOS utility, native helper, and Chromium extension for saving web links into Apple Reminders.
 
-The extension saves the current page into the Reminders list named `链接`, with an editable title, native Reminders URL card, native tags, and notes. The macOS app keeps the extension portable: it copies the extension runtime into a chosen persistent folder, installs Native Messaging manifests, carries the `rem` dependency, and can export/import the `链接` list as YAML.
+The extension saves the current page into the Reminders list named `链接`, with an editable title, Reminders URL, notes, and hashtag-style tags. The macOS app keeps the extension portable: it copies the extension runtime into a chosen persistent folder, installs Native Messaging manifests, carries the `rem` dependency for YAML import/export, and can export/import the `链接` list as YAML.
 
 ## Repository Layout
 
 - `Sources/Remlink/App.swift`: SwiftUI manager app
+- `Sources/RemlinkHelper`: Native Messaging helper launched on demand by the browser
 - `Sources/Remlink/Resources/extension`: Chromium extension
-- `Sources/Remlink/Resources/native`: Native Messaging host
+- `Sources/Remlink/Resources/native`: legacy Python host kept as a development fallback
 - `Sources/Remlink/Resources/scripts`: YAML export helper used by LaunchAgent
 - `Sources/Remlink/Resources/bin/rem`: bundled `rem` CLI dependency
 - `Sources/Remlink/Resources/app`: app icon resources
@@ -117,6 +118,12 @@ The extension talks to the native host named:
 com.landlord.remlink
 ```
 
+The host path points to the signed helper inside:
+
+```text
+/Applications/Remlink.app/Contents/Helpers/RemlinkHelper.app/Contents/MacOS/RemlinkHelper
+```
+
 The manager app writes manifests for Chrome, Chromium, Brave, Edge, Arc, and Helium. The developer helper can do the same from the repository:
 
 ```bash
@@ -125,7 +132,7 @@ The manager app writes manifests for Chrome, Chromium, Brave, Edge, Arc, and Hel
 
 ## Reminders Permission
 
-Remlink uses the bundled or Homebrew `rem` CLI to access Reminders. If export/import fails with a Reminders permission error, click `授权提醒事项` in the app and allow Reminders access in macOS.
+The browser extension writes through `RemlinkHelper`. YAML export/import still uses the bundled or Homebrew `rem` CLI. If browser saving fails with a Reminders permission error, click `授权提醒事项` in the app and allow `RemlinkHelper` access in macOS. If export/import fails, grant access to `rem` as well.
 
 If macOS does not show a prompt, check:
 

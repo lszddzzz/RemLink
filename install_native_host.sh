@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESOURCE_DIR="$ROOT_DIR/Sources/Remlink/Resources"
 HOST_NAME="com.landlord.remlink"
-HOST_SCRIPT="$RESOURCE_DIR/native/reminders_host.py"
+HOST_SCRIPT="/Applications/Remlink.app/Contents/Helpers/RemlinkHelper.app/Contents/MacOS/RemlinkHelper"
 EXTENSION_MANIFEST="$RESOURCE_DIR/extension/manifest.json"
 
 EXTENSION_ID="$(python3 - "$EXTENSION_MANIFEST" <<'PY'
@@ -22,7 +22,11 @@ print("".join(alphabet[b >> 4] + alphabet[b & 15] for b in digest))
 PY
 )"
 
-chmod +x "$HOST_SCRIPT"
+if [[ ! -x "$HOST_SCRIPT" ]]; then
+  echo "找不到 RemlinkHelper: $HOST_SCRIPT" >&2
+  echo "请先运行 ./build_app.sh，并把 .build/Remlink.app 安装到 /Applications/Remlink.app。" >&2
+  exit 1
+fi
 
 HOST_JSON="$(mktemp)"
 cat > "$HOST_JSON" <<JSON

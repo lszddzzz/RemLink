@@ -209,7 +209,7 @@ struct ContentView: View {
     )
     try chmodExecutable(installURL.appendingPathComponent("native/reminders_host.py"))
     try chmodExecutable(installURL.appendingPathComponent("scripts/export_links_yaml.py"))
-    try writeNativeMessagingManifests(hostPath: installURL.appendingPathComponent("native/reminders_host.py").path)
+    try writeNativeMessagingManifests(hostPath: helperHostURL().path)
   }
 
   private func requireInstallDirectory() throws -> URL {
@@ -326,6 +326,19 @@ struct ContentView: View {
       let target = targetDirectory.appendingPathComponent("\(Constants.hostName).json")
       try data.write(to: target, options: .atomic)
     }
+  }
+
+  private func helperHostURL() throws -> URL {
+    let candidates = [
+      Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/RemlinkHelper.app/Contents/MacOS/RemlinkHelper"),
+      Bundle.main.bundleURL.appendingPathComponent("Contents/MacOS/RemlinkHelper"),
+      Bundle.main.executableURL?.deletingLastPathComponent().appendingPathComponent("RemlinkHelper")
+    ].compactMap { $0 }
+
+    for candidate in candidates where FileManager.default.isExecutableFile(atPath: candidate.path) {
+      return candidate
+    }
+    throw ManagerError("找不到 RemlinkHelper。请重新构建并从 /Applications/Remlink.app 启动。")
   }
 
   private func exportLinksYAML() throws -> String {
@@ -474,9 +487,8 @@ struct ContentView: View {
   }
 
   private func authorizeReminders() throws -> String {
-    let result = try runRem(arguments: ["lists", "--output", "json"])
-    _ = result.output
-    return "提醒事项授权可用。现在可以导出或导入链接。"
+    _ = try runProcess(try helperHostURL(), arguments: ["--authorize"])
+    return "RemlinkHelper 提醒事项授权可用。浏览器插件现在会通过 RemlinkHelper 写入提醒事项。"
   }
 
   private func fetchReminderLinks() throws -> [ReminderLink] {
