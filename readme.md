@@ -1,5 +1,7 @@
 # Remlink
 
+[中文说明](README.zh-CN.md)
+
 Remlink is a macOS utility and Chromium extension for saving web links into Apple Reminders.
 
 The extension saves the current page into the Reminders list named `链接`, with an editable title, native Reminders URL card, native tags, and notes. The macOS app keeps the extension portable: it copies the extension runtime into a chosen persistent folder, installs Native Messaging manifests, carries the `rem` dependency, and can export/import the `链接` list as YAML.
@@ -130,3 +132,7 @@ If macOS does not show a prompt, check:
 ```text
 系统设置 → 隐私与安全性 → 提醒事项
 ```
+
+## Release
+
+GitHub Actions builds the app and creates a GitHub Release when a `v*` tag is pushed. The release workflow can also be started manually from the GitHub Actions page.
