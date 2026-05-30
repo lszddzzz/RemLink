@@ -43,6 +43,7 @@ TARGET_DIRS=(
   "$HOME/Library/Application Support/BraveSoftware/Brave-Browser/NativeMessagingHosts"
   "$HOME/Library/Application Support/Microsoft Edge/NativeMessagingHosts"
   "$HOME/Library/Application Support/Arc/User Data/NativeMessagingHosts"
+  "$HOME/Library/Application Support/net.imput.helium/NativeMessagingHosts"
 )
 
 for dir in "${TARGET_DIRS[@]}"; do

@@ -316,7 +316,8 @@ struct ContentView: View {
       "Library/Application Support/Chromium/NativeMessagingHosts",
       "Library/Application Support/BraveSoftware/Brave-Browser/NativeMessagingHosts",
       "Library/Application Support/Microsoft Edge/NativeMessagingHosts",
-      "Library/Application Support/Arc/User Data/NativeMessagingHosts"
+      "Library/Application Support/Arc/User Data/NativeMessagingHosts",
+      "Library/Application Support/net.imput.helium/NativeMessagingHosts"
     ]
 
     for directory in directories {

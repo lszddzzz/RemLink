@@ -117,7 +117,7 @@ The extension talks to the native host named:
 com.landlord.remlink
 ```
 
-The manager app writes manifests for Chrome, Chromium, Brave, Edge, and Arc. The developer helper can do the same from the repository:
+The manager app writes manifests for Chrome, Chromium, Brave, Edge, Arc, and Helium. The developer helper can do the same from the repository:
 
 ```bash
 ./install_native_host.sh
