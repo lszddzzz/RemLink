@@ -1,0 +1,131 @@
+:root {
+  color-scheme: light dark;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+}
+
+body {
+  margin: 0;
+  width: 340px;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.page-title {
+  margin: 0;
+  color: color-mix(in srgb, CanvasText 66%, transparent);
+  font-size: 12px;
+  line-height: 1.45;
+  max-height: 36px;
+  overflow: hidden;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 550;
+}
+
+textarea,
+input {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+  border-radius: 6px;
+  padding: 8px 9px;
+  background: color-mix(in srgb, Canvas 96%, CanvasText 4%);
+  color: CanvasText;
+  font: inherit;
+  font-weight: 400;
+  outline: none;
+}
+
+textarea:focus,
+input:focus {
+  border-color: #c21f32;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #c21f32 22%, transparent);
+}
+
+.tag-field {
+  position: relative;
+}
+
+.tag-suggestions {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  max-height: 168px;
+  overflow-y: auto;
+  border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+  border-radius: 6px;
+  background: Canvas;
+  box-shadow: 0 10px 28px color-mix(in srgb, CanvasText 18%, transparent);
+}
+
+.tag-option {
+  padding: 8px 10px;
+  color: CanvasText;
+  font-size: 13px;
+  font-weight: 450;
+  cursor: pointer;
+}
+
+.tag-option[aria-selected="true"] {
+  background: color-mix(in srgb, #c21f32 13%, Canvas);
+}
+
+.tag-option.create {
+  color: #c21f32;
+}
+
+.tag-option.empty {
+  color: color-mix(in srgb, CanvasText 58%, transparent);
+  cursor: default;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+button {
+  border: 0;
+  border-radius: 6px;
+  padding: 8px 14px;
+  background: #c21f32;
+  color: white;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+
+#status {
+  min-width: 0;
+  color: color-mix(in srgb, CanvasText 68%, transparent);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+#status.error {
+  color: #c21f32;
+}

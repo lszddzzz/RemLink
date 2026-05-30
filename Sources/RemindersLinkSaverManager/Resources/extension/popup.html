@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>保存链接</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="panel">
+      <header>
+        <h1>保存到提醒事项</h1>
+        <p id="pageTitle" class="page-title"></p>
+      </header>
+
+      <label>
+        标题
+        <input id="title" type="text" placeholder="提醒事项标题">
+      </label>
+
+      <label>
+        备注
+        <textarea id="note" rows="4" placeholder="可留空"></textarea>
+      </label>
+
+      <label>
+        标签
+        <div class="tag-field">
+          <input id="tags" type="text" placeholder="链接-学术, 链接-待读">
+          <div id="tagSuggestions" class="tag-suggestions" role="listbox" hidden></div>
+        </div>
+      </label>
+
+      <div class="actions">
+        <button id="saveButton" type="button">保存</button>
+        <span id="status" role="status"></span>
+      </div>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
