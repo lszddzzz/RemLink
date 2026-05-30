@@ -1,4 +1,15 @@
-# 提醒事项链接收藏器管理器
+# 提醒事项链接收藏器
+
+这是浏览器插件、Native Messaging host、YAML 导入导出脚本和 SwiftUI 管理器 App 的统一仓库。旧的独立浏览器插件目录已合入本仓库，后续以这里为唯一维护位置。
+
+核心目录：
+
+- `Sources/RemindersLinkSaverManager/App.swift`：SwiftUI 管理器 App
+- `Sources/RemindersLinkSaverManager/Resources/extension`：Chromium 浏览器扩展
+- `Sources/RemindersLinkSaverManager/Resources/native`：Native Messaging host
+- `Sources/RemindersLinkSaverManager/Resources/scripts`：每日 YAML 导出脚本
+- `Sources/RemindersLinkSaverManager/Resources/bin/rem`：随 App 携带的 `rem` 依赖
+- `Sources/RemindersLinkSaverManager/Resources/app`：App 图标资源
 
 这是一个极简 SwiftUI macOS App，用来在新电脑上复刻 Chromium 扩展的完整运行环境。
 
@@ -35,7 +46,13 @@ cd /Users/lszddz/Code/Code通用/浏览器插件/reminders-link-saver-manager
 加载扩展的目录示例：
 
 ```text
-你选择的目录/extension
+你选择的持久化目录/extension
+```
+
+开发时如果不经过 App，也可以直接加载仓库内的扩展目录：
+
+```text
+/Users/lszddz/Code/Code通用/浏览器插件/reminders-link-saver-manager/Sources/RemindersLinkSaverManager/Resources/extension
 ```
 
 首次使用时，如果 Reminders 权限报错，在普通终端执行：
