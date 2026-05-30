@@ -2,16 +2,16 @@
 import PackageDescription
 
 let package = Package(
-  name: "RemindersLinkSaverManager",
+  name: "Remlink",
   platforms: [
     .macOS(.v13)
   ],
   products: [
-    .executable(name: "RemindersLinkSaverManager", targets: ["RemindersLinkSaverManager"])
+    .executable(name: "Remlink", targets: ["Remlink"])
   ],
   targets: [
     .executableTarget(
-      name: "RemindersLinkSaverManager",
+      name: "Remlink",
       resources: [
         .copy("Resources")
       ]

@@ -4,16 +4,16 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 private enum Constants {
-  static let hostName = "com.landlord.reminders_link_saver"
+  static let hostName = "com.landlord.remlink"
   static let extensionID = "gomigjglhhobgbplnnofkhooolekeohd"
   static let extensionPage = "chrome://extensions/"
   static let shortcutsPage = "chrome://extensions/shortcuts"
   static let listName = "链接"
-  static let dailyExportAgentID = "com.landlord.reminders-link-saver.daily-export"
+  static let dailyExportAgentID = "com.landlord.remlink.daily-export"
 }
 
 @main
-struct RemindersLinkSaverManagerApp: App {
+struct RemlinkApp: App {
   var body: some Scene {
     WindowGroup {
       ContentView()
@@ -36,7 +36,7 @@ struct ContentView: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 18) {
       VStack(alignment: .leading, spacing: 6) {
-        Text("提醒事项链接收藏器")
+        Text("Remlink")
           .font(.system(size: 22, weight: .semibold))
         Text("把浏览器插件、Native host 和依赖复制到一个可迁移目录。")
           .font(.system(size: 13))
@@ -104,7 +104,7 @@ struct ContentView: View {
       }
 
       HStack(spacing: 10) {
-        Button("打开 Chrome 扩展页") {
+        Button("打开扩展页") {
           openBrowserInternalPage(Constants.extensionPage)
         }
         Button("打开快捷键页") {
@@ -226,7 +226,7 @@ struct ContentView: View {
       Bundle.module.resourceURL,
       Bundle.module.resourceURL?.appendingPathComponent("Resources", isDirectory: true),
       mainResourceURL?.appendingPathComponent("Resources", isDirectory: true),
-      mainResourceURL?.appendingPathComponent("RemindersLinkSaverManager_RemindersLinkSaverManager.bundle/Resources", isDirectory: true)
+      mainResourceURL?.appendingPathComponent("Remlink_Remlink.bundle/Resources", isDirectory: true)
     ].compactMap { $0 }
 
     for candidate in candidates where hasBundledPayload(at: candidate) {
@@ -303,7 +303,7 @@ struct ContentView: View {
   private func writeNativeMessagingManifests(hostPath: String) throws {
     let manifest: [String: Any] = [
       "name": Constants.hostName,
-      "description": "Save Chromium links to macOS Reminders",
+      "description": "Save Chromium links to Reminders with Remlink",
       "path": hostPath,
       "type": "stdio",
       "allowed_origins": ["chrome-extension://\(Constants.extensionID)/"]

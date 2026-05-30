@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "提醒事项链接收藏器",
+  "name": "Remlink",
   "description": "将当前网页保存到 macOS 提醒事项的“链接”列表，可添加备注和标签。",
   "version": "0.1.2",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqwW2aPMPIDeVHyYBeyYQPJykc3Ui8J8GbSx2IO5SncK9ww52wihjgzcwRdV/Bqh1SQr7JXdjHNu1q1+8UFTDnkCdEu1b6Sk249Hxk0JOlw/fmGMMh3xbdP7NuyuE9jE7hI17ejk5nPHD8hM67M/6Xuo8e19Up2SOZNAhymLZPfzy15Un2O2IdbZTvjjrJIfJYlzvjT83kOuX6McRnjiRGtSAKKyh8KYyJFPgBj2OxHP4czvMiKej1Cz7XKlHnzq+DnbUKvuWZLTHtBdrZRR09qUwwmNcURUHprphjmJr3F13CqOwo4BsEghUEykY7QNtSO2tJCu4hUeA2du9NISmbQIDAQAB",
@@ -10,7 +10,7 @@
     "storage"
   ],
   "action": {
-    "default_title": "保存到提醒事项",
+    "default_title": "Remlink",
     "default_popup": "popup.html"
   },
   "commands": {
@@ -19,7 +19,7 @@
         "default": "Alt+Shift+L",
         "mac": "Alt+Shift+L"
       },
-      "description": "打开提醒事项链接收藏器"
+      "description": "打开 Remlink"
     }
   },
   "icons": {

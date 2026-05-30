@@ -1,4 +1,4 @@
-const HOST_NAME = "com.landlord.reminders_link_saver";
+const HOST_NAME = "com.landlord.remlink";
 
 const pageTitle = document.getElementById("pageTitle");
 const titleInput = document.getElementById("title");

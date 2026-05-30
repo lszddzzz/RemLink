@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-RESOURCE_DIR="$ROOT_DIR/Sources/RemindersLinkSaverManager/Resources"
-HOST_NAME="com.landlord.reminders_link_saver"
+RESOURCE_DIR="$ROOT_DIR/Sources/Remlink/Resources"
+HOST_NAME="com.landlord.remlink"
 HOST_SCRIPT="$RESOURCE_DIR/native/reminders_host.py"
 EXTENSION_MANIFEST="$RESOURCE_DIR/extension/manifest.json"
 
@@ -28,7 +28,7 @@ HOST_JSON="$(mktemp)"
 cat > "$HOST_JSON" <<JSON
 {
   "name": "$HOST_NAME",
-  "description": "Save Chromium links to macOS Reminders",
+  "description": "Save Chromium links to Reminders with Remlink",
   "path": "$HOST_SCRIPT",
   "type": "stdio",
   "allowed_origins": [

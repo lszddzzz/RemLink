@@ -6,14 +6,14 @@ cd "$ROOT_DIR"
 
 swift build -c release
 
-APP_DIR="$ROOT_DIR/.build/RemindersLinkSaverManager.app"
-EXECUTABLE="$ROOT_DIR/.build/release/RemindersLinkSaverManager"
+APP_DIR="$ROOT_DIR/.build/Remlink.app"
+EXECUTABLE="$ROOT_DIR/.build/release/Remlink"
 
 rm -rf "$APP_DIR"
 mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
-cp "$EXECUTABLE" "$APP_DIR/Contents/MacOS/RemindersLinkSaverManager"
+cp "$EXECUTABLE" "$APP_DIR/Contents/MacOS/Remlink"
 
-RESOURCE_BUNDLE="$(find "$ROOT_DIR/.build" -name 'RemindersLinkSaverManager_RemindersLinkSaverManager.bundle' -type d | head -n 1)"
+RESOURCE_BUNDLE="$(find "$ROOT_DIR/.build" -name 'Remlink_Remlink.bundle' -type d | head -n 1)"
 if [[ -n "$RESOURCE_BUNDLE" ]]; then
   cp -R "$RESOURCE_BUNDLE" "$APP_DIR/Contents/Resources/"
   APP_ICON="$(find "$RESOURCE_BUNDLE" -path '*/app/AppIcon.icns' -type f | head -n 1)"
@@ -28,13 +28,13 @@ cat > "$APP_DIR/Contents/Info.plist" <<'PLIST'
 <plist version="1.0">
 <dict>
   <key>CFBundleExecutable</key>
-  <string>RemindersLinkSaverManager</string>
+  <string>Remlink</string>
   <key>CFBundleIdentifier</key>
-  <string>com.landlord.RemindersLinkSaverManager</string>
+  <string>com.landlord.Remlink</string>
   <key>CFBundleName</key>
-  <string>提醒事项链接收藏器</string>
+  <string>Remlink</string>
   <key>CFBundleDisplayName</key>
-  <string>提醒事项链接收藏器</string>
+  <string>Remlink</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleIconFile</key>
