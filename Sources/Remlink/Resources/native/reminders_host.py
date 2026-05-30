@@ -11,6 +11,21 @@ LIST_NAME = "链接"
 REM_BINARY = "/opt/homebrew/bin/rem"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOCAL_REM_BINARY = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "bin", "rem"))
+LOG_PATH = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "logs", "native-host.log"))
+
+
+def log(message):
+  try:
+    os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+    with open(LOG_PATH, "a", encoding="utf-8") as file:
+      file.write(message + "\n")
+  except Exception:
+    pass
+
+
+def is_reminders_access_denied(detail):
+  lowered = detail.lower()
+  return "access denied" in lowered or "reminders access denied" in lowered or "failed to initialize reminders access" in lowered
 
 
 def read_message():
@@ -75,13 +90,20 @@ def collect_tags(value, result):
 
 def list_existing_tags(filter_text):
   rem = get_rem_binary()
-  result = subprocess.run(
-    [rem, "list", "--list", LIST_NAME, "--output", "json"],
-    check=True,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
-    text=True,
-  )
+  try:
+    result = subprocess.run(
+      [rem, "list", "--list", LIST_NAME, "--output", "json"],
+      check=True,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE,
+      text=True,
+    )
+  except subprocess.CalledProcessError as error:
+    detail = (error.stderr or error.stdout or str(error)).strip()
+    if is_reminders_access_denied(detail):
+      log(f"list_tags fallback: rem access denied: {detail}")
+      return []
+    raise
 
   tags = set()
   try:
@@ -127,8 +149,22 @@ def save_to_reminders(title, url, note, tags):
   try:
     save_with_rem(title, url, note, tags)
     return
-  except FileNotFoundError:
-    pass
+  except FileNotFoundError as error:
+    log(f"save fallback: rem missing: {error}")
+  except subprocess.CalledProcessError as error:
+    detail = (error.stderr or error.stdout or str(error)).strip()
+    if not is_reminders_access_denied(detail):
+      raise
+    log(f"save fallback: rem access denied: {detail}")
+
+  body_parts = []
+  if url:
+    body_parts.append(url)
+  if note:
+    body_parts.append(note)
+  if tags:
+    body_parts.append("标签：" + " ".join(f"#{tag}" for tag in tags))
+  body = "\n\n".join(body_parts)
 
   script = """
 on run argv
@@ -147,7 +183,7 @@ on run argv
 end run
 """
   subprocess.run(
-    ["osascript", "-e", script, LIST_NAME, title, note],
+    ["osascript", "-e", script, LIST_NAME, title, body],
     check=True,
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
@@ -181,14 +217,18 @@ def main():
   try:
     message = read_message()
     if message is None:
+      log("no native message received")
       return
+    log(f"received action: {message.get('action')}")
     write_message(handle(message))
   except subprocess.CalledProcessError as error:
     detail = (error.stderr or error.stdout or str(error)).strip()
-    if "access denied" in detail.lower() or "reminders access denied" in detail.lower():
+    log(f"subprocess error: {detail}")
+    if is_reminders_access_denied(detail):
       detail = detail + "。请在终端运行 `rem lists`，按系统提示允许访问提醒事项后再试。"
     write_message({"ok": False, "error": f"Reminders 写入失败：{detail}"})
   except Exception as error:
+    log(f"error: {error}")
     write_message({"ok": False, "error": str(error)})
 
 
