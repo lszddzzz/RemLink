@@ -21,14 +21,14 @@ The extension saves the current page into the Reminders list named `链接`, wit
 ## Build
 
 ```bash
-cd /Users/lszddz/Code/Code通用/浏览器插件/reminders-link-saver-manager
+cd /Users/lszddz/Code/Remlink
 ./build_app.sh
 ```
 
 The built app is:
 
 ```text
-/Users/lszddz/Code/Code通用/浏览器插件/reminders-link-saver-manager/.build/Remlink.app
+/Users/lszddz/Code/Remlink/.build/Remlink.app
 ```
 
 ## Setup Flow
@@ -47,7 +47,7 @@ The built app is:
 For development, you can also load the extension directly from the repository:
 
 ```text
-/Users/lszddz/Code/Code通用/浏览器插件/reminders-link-saver-manager/Sources/Remlink/Resources/extension
+/Users/lszddz/Code/Remlink/Sources/Remlink/Resources/extension
 ```
 
 The extension shortcut defaults to:
