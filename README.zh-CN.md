@@ -1,5 +1,7 @@
 # Remlink
 
+> **已退役（2026-09）。** RemLink 的全部能力已迁移至 [Panel](https://github.com/lszddzzz/Panel) 的 RemLink 插件（Panel issue #192/#194/#195/#196）：保存当前网页、浏览/搜索/编辑/删除「链接」列表、原生标签、YAML 导入导出与每日自动导出都在 Panel 内完成——不再需要浏览器扩展、Native Messaging host 与独立 App。本仓库仅保留为历史实现与迁移参考，不再维护、不再新增功能。你的提醒事项数据与既有 YAML 导出文件不受影响，Panel 可直接导入。
+
 [English README](readme.md)
 
 Remlink 是一个 macOS 工具 App、Native helper 和 Chromium 系浏览器扩展，用来把当前网页保存到 Apple 提醒事项。
