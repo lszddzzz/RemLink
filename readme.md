@@ -1,5 +1,7 @@
 # Remlink
 
+> **Retired (2026-09).** RemLink's capabilities now live in the [Panel](https://github.com/lszddzzz/Panel) RemLink plugin (Panel issues #192/#194/#195/#196): saving the current page, browsing/searching/editing/deleting links in the `链接` list, native tags, YAML import/export, and the daily auto-export all run inside Panel — no browser extension, no Native Messaging host, no standalone app. This repository is kept as a historical reference and migration source only; it is no longer maintained and receives no new features. Your Reminders data and existing YAML exports are untouched — Panel can import them directly.
+
 [中文说明](README.zh-CN.md)
 
 Remlink is a macOS utility, native helper, and Chromium extension for saving web links into Apple Reminders.
